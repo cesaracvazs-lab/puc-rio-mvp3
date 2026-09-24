@@ -8,7 +8,7 @@ O sistema ajuda clínicas, consultórios e unidades de atendimento a organizar e
 
 ## Arquitetura
 
-A aplicação segue o cenário 2 do MVP: a API principal consulta o ViaCEP para obter dados do endereço, persiste os pacientes no SQLite e chama a API secundária de Alertas e Calendário de Retorno quando existe `ultima_visita`.
+A aplicação segue o cenário 2 do MVP com uma regra de negócio autônoma de acompanhamento clínico: a API principal consulta o ViaCEP para obter dados do endereço, persiste os pacientes no SQLite e chama a API secundária de Alertas e Calendário de Retorno quando existe `ultima_visita`.
 
 ![Arquitetura do MVP](docs/arquitetura_mvp.svg)
 
@@ -33,11 +33,11 @@ Esse endereço pode ser alterado pela variável `ALERTA_RETORNO_URL`.
 
 ## API externa utilizada
 
-- ViaCEP
-- URL base: https://viacep.com.br/ws/{cep}/json/
-- Licença: uso livre para consulta pública, conforme documentação do serviço.
-- Cadastro: não exige cadastro para uso básico.
-- Rota utilizada: GET para consulta de um CEP específico.
+- ViaCEP: https://viacep.com.br/
+- URL consultada: https://viacep.com.br/ws/{cep}/json/
+- Serviço público sem cadastro para a consulta básica utilizada neste MVP.
+- Rota utilizada: `GET /ws/{cep}/json/`.
+- A API principal trata o JSON recebido e persiste o endereço; o usuário não é redirecionado ao ViaCEP.
 
 ## Requisitos
 
