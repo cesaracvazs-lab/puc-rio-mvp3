@@ -1,4 +1,4 @@
-<svg width="900" height="420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arquitetura do MVP">
+<svg width="1100" height="610" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Arquitetura do MVP">
   <defs>
     <style>
       .title { font: bold 26px Arial, sans-serif; fill: #1f2937; }
@@ -16,30 +16,44 @@
     </marker>
   </defs>
 
-  <text x="450" y="40" text-anchor="middle" class="title">Sistema de Controle de Pacientes</text>
+  <text x="550" y="45" text-anchor="middle" class="title">Sistema de Controle de Pacientes</text>
 
-  <rect x="60" y="90" width="220" height="180" class="box blue"/>
-  <text x="170" y="130" text-anchor="middle" class="subtitle">API Principal</text>
-  <text x="170" y="165" text-anchor="middle" class="text">FastAPI</text>
-  <text x="170" y="195" text-anchor="middle" class="small">Cadastro de pacientes</text>
-  <text x="170" y="220" text-anchor="middle" class="small">Filtros, paginação e</text>
-  <text x="170" y="242" text-anchor="middle" class="small">ordenação dinâmica</text>
+  <rect x="55" y="105" width="260" height="190" class="box blue"/>
+  <text x="185" y="145" text-anchor="middle" class="subtitle">API Principal</text>
+  <text x="185" y="180" text-anchor="middle" class="text">FastAPI</text>
+  <text x="185" y="210" text-anchor="middle" class="small">Cadastro de pacientes</text>
+  <text x="185" y="235" text-anchor="middle" class="small">Filtros e paginação</text>
+  <text x="185" y="260" text-anchor="middle" class="small">Orquestra os serviços</text>
 
-  <rect x="340" y="90" width="220" height="180" class="box green"/>
-  <text x="450" y="130" text-anchor="middle" class="subtitle">Banco de Dados</text>
-  <text x="450" y="170" text-anchor="middle" class="text">SQLite</text>
-  <text x="450" y="200" text-anchor="middle" class="small">pacientes.db</text>
-  <text x="450" y="225" text-anchor="middle" class="small">SQLAlchemy + Pydantic</text>
+  <rect x="400" y="105" width="260" height="190" class="box" style="fill:#fef3c7;stroke:#d97706"/>
+  <text x="530" y="145" text-anchor="middle" class="subtitle">API Secundária</text>
+  <text x="530" y="180" text-anchor="middle" class="text">Alertas e Retorno</text>
+  <text x="530" y="210" text-anchor="middle" class="small">Cálculo de urgência</text>
+  <text x="530" y="235" text-anchor="middle" class="small">Regras por situação</text>
+  <text x="530" y="260" text-anchor="middle" class="small">REST / FastAPI</text>
 
-  <rect x="620" y="90" width="220" height="180" class="box purple"/>
-  <text x="730" y="130" text-anchor="middle" class="subtitle">API Externa</text>
-  <text x="730" y="170" text-anchor="middle" class="text">ViaCEP</text>
-  <text x="730" y="200" text-anchor="middle" class="small">Consulta de CEP</text>
-  <text x="730" y="225" text-anchor="middle" class="small">Endereço automático</text>
+  <rect x="790" y="105" width="255" height="190" class="box purple"/>
+  <text x="917" y="145" text-anchor="middle" class="subtitle">API Externa</text>
+  <text x="917" y="180" text-anchor="middle" class="text">ViaCEP</text>
+  <text x="917" y="215" text-anchor="middle" class="small">Consulta de CEP</text>
+  <text x="917" y="240" text-anchor="middle" class="small">Endereço automático</text>
+  <text x="917" y="265" text-anchor="middle" class="small">Serviço público REST</text>
 
-  <path d="M 280 180 L 340 180" class="arrow"/>
-  <path d="M 560 180 L 620 180" class="arrow"/>
-  <path d="M 170 270 L 170 320 L 730 320 L 730 270" class="arrow"/>
+  <rect x="55" y="390" width="260" height="135" class="box green"/>
+  <text x="185" y="430" text-anchor="middle" class="subtitle">Banco principal</text>
+  <text x="185" y="465" text-anchor="middle" class="text">SQLite</text>
+  <text x="185" y="495" text-anchor="middle" class="small">pacientes.db</text>
 
-  <text x="450" y="350" text-anchor="middle" class="small">Fluxo: cadastro → consulta ViaCEP → persistência → consulta com filtros e paginação</text>
+  <rect x="400" y="390" width="260" height="135" class="box green"/>
+  <text x="530" y="430" text-anchor="middle" class="subtitle">Banco secundário</text>
+  <text x="530" y="465" text-anchor="middle" class="text">SQLite</text>
+  <text x="530" y="495" text-anchor="middle" class="small">alertas.db</text>
+
+  <path d="M 315 190 L 400 190" class="arrow"/>
+  <path d="M 185 295 L 185 390" class="arrow"/>
+  <path d="M 530 295 L 530 390" class="arrow"/>
+  <path d="M 315 245 C 460 335, 700 335, 790 245" class="arrow"/>
+
+  <text x="550" y="565" text-anchor="middle" class="small">API principal → API de Alertas: cálculo do retorno e gerenciamento de alertas</text>
+  <text x="550" y="590" text-anchor="middle" class="small">API principal → ViaCEP: consulta e preenchimento automático do endereço</text>
 </svg>

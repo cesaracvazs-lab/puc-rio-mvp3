@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 
 import requests
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 from dao import paciente_dao
 from dto.paciente_dto import PacienteCreate, PacienteUpdate
 from models import Paciente
+from service.alerta_retorno_client import calcular_retorno
 
 
 def buscar_endereco_por_cep(cep: str) -> dict:
@@ -59,8 +61,15 @@ def criar_paciente(db: Session, paciente_schema: PacienteCreate) -> Paciente:
 
     dados_cep = buscar_endereco_por_cep(paciente_schema.cep)
     paciente_schema = preencher_endereco(paciente_schema, dados_cep)
-    paciente = Paciente(**paciente_schema.model_dump(), cep=dados_cep.get("cep") or paciente_schema.cep)
-    return paciente_dao.salvar(db, paciente)
+    dados_paciente = paciente_schema.model_dump()
+    dados_paciente["cep"] = dados_cep.get("cep") or paciente_schema.cep
+    paciente = Paciente(**dados_paciente)
+    paciente = paciente_dao.salvar(db, paciente)
+
+    if paciente.ultima_visita:
+        calcular_retorno(paciente.id, date.fromisoformat(paciente.ultima_visita), paciente.situacao)
+
+    return paciente
 
 
 def atualizar_paciente(db: Session, paciente_id: int, paciente_schema: PacienteUpdate) -> Paciente:
@@ -89,7 +98,12 @@ def atualizar_paciente(db: Session, paciente_id: int, paciente_schema: PacienteU
         if valor is not None:
             setattr(paciente, campo, valor)
 
-    return paciente_dao.salvar(db, paciente)
+    paciente = paciente_dao.salvar(db, paciente)
+
+    if paciente.ultima_visita and ("ultima_visita" in dados or "situacao" in dados):
+        calcular_retorno(paciente.id, date.fromisoformat(paciente.ultima_visita), paciente.situacao)
+
+    return paciente
 
 
 def obter_paciente(db: Session, paciente_id: int) -> Paciente:

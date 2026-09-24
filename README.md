@@ -1,6 +1,6 @@
 # Sistema de Controle de Pacientes
 
-API principal para o gerenciamento de pacientes com cadastro, busca, filtros avançados, paginação, ordenação dinâmica e integração com a API pública do ViaCEP para preenchimento automático de endereço a partir do CEP.
+API principal para o gerenciamento de pacientes com cadastro, busca, filtros avançados, paginação, ordenação dinâmica e integração com ViaCEP e com a API secundária de alertas para calcular o retorno do paciente.
 
 ## Objetivo
 
@@ -8,7 +8,7 @@ O sistema ajuda clínicas, consultórios e unidades de atendimento a organizar e
 
 ## Arquitetura
 
-A aplicação segue o cenário 2 do MVP: a API principal consulta a API externa do ViaCEP para obter dados do endereço e persiste os registros no SQLite.
+A aplicação segue o cenário 2 do MVP: a API principal consulta o ViaCEP para obter dados do endereço, persiste os pacientes no SQLite e chama a API secundária de Alertas e Calendário de Retorno quando existe `ultima_visita`.
 
 ![Arquitetura do MVP](docs/arquitetura_mvp.svg)
 
@@ -20,6 +20,16 @@ A aplicação segue o cenário 2 do MVP: a API principal consulta a API externa 
 - SQLite
 - Pydantic
 - Requests
+
+### Comunicação com a API secundária
+
+Por padrão, a API principal procura a API de alertas em:
+
+```text
+http://127.0.0.1:8001
+```
+
+Esse endereço pode ser alterado pela variável `ALERTA_RETORNO_URL`.
 
 ## API externa utilizada
 
@@ -33,7 +43,7 @@ A aplicação segue o cenário 2 do MVP: a API principal consulta a API externa 
 
 - Python 3.12+
 - Pip
-- Docker (opcional, para execução em container)
+- Docker
 
 ## Instalação local
 
@@ -56,8 +66,8 @@ A aplicação segue o cenário 2 do MVP: a API principal consulta a API externa 
    uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    ```
 5. Acesse a documentação Swagger:
-   - http://localhost:8001/docs
-   - http://localhost:8001/redoc
+   - http://localhost:8000/docs
+   - http://localhost:8000/redoc
 
 ## Endpoints principais
 
@@ -75,13 +85,13 @@ Parâmetros:
 - order_direction: asc ou desc
 
 ### POST /pacientes
-Cria um novo paciente com preenchimento automático do endereço via ViaCEP.
+Cria um novo paciente com preenchimento automático do endereço via ViaCEP e calcula o alerta de retorno quando `ultima_visita` é informada.
 
 ### GET /pacientes/{paciente_id}
 Busca um paciente por ID.
 
 ### PUT /pacientes/{paciente_id}
-Atualiza os dados do paciente.
+Atualiza os dados do paciente e recalcula o alerta quando `ultima_visita` ou `situacao` é alterada.
 
 ### DELETE /pacientes/{paciente_id}
 Remove um paciente.
@@ -96,14 +106,45 @@ pacientes.db
 
 ## Executando com Docker
 
-1. Construa a imagem:
+Crie uma rede para permitir a comunicação entre os dois containers:
+
+```bash
+docker network create mvp-rede
+```
+
+1. Construa a imagem da API secundária no repositório `alerta_retorno`:
    ```bash
-   docker build -t controle_pacientes .
+   docker build -t api-alerta-retorno .
    ```
-2. Execute o container:
+2. Inicie a API secundária na rede do MVP:
    ```bash
-   docker run -p 8000:8000 controle_pacientes
+   docker run --rm --name alerta-retorno \
+     --network mvp-rede \
+     -p 8001:8001 \
+     api-alerta-retorno
    ```
+3. Construa a imagem da API principal:
+   ```bash
+   docker build -t controle-pacientes .
+   ```
+4. Execute a API principal na rede do MVP:
+   ```bash
+   docker run --rm --name controle-pacientes \
+     --network mvp-rede \
+     -e ALERTA_RETORNO_URL=http://alerta-retorno:8001 \
+     -p 8000:8000 \
+     controle-pacientes
+   ```
+
+   O SQLite fica disponível durante a execução do container. Para preservar o
+   banco entre execuções, configure posteriormente um volume para o caminho
+   específico do arquivo `pacientes.db`, sem montar o volume sobre `/app`.
+
+5. Acesse a documentação:
+   - http://localhost:8000/docs
+
+A API secundária deve estar executando na mesma rede. Consulte o README do
+repositório `alerta_retorno` para construir e iniciar o container `alerta-retorno`.
 
 ## Observações
 
